@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build": "node node_modules/babel-cli/bin/babel.js -d dist src",
+    "test": "npm run build && node ../moovcheckout-catalyst/packages/ux/node_modules/mocha/bin/mocha",
+    "watch": "node node_modules/nodemon/bin/nodemon.js -w src -w test -x \"npm test\""
+  },
+  "dependencies": {
+    "babel-cli": "^6.7.7",
+    "lodash": "^4.11.1"
+  }
+}
