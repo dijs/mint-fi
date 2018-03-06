@@ -1,6 +1,6 @@
 require('should');
 
-var Utils = require('../dist/utils');
+var Utils = require('../src/utils');
 
 var data = '"4/25/2016","Tom Thumb","TOM THUMB","41.25","debit","Food","Blue Cash Preferred SM","",""\n' +
   '"4/26/2016","A","A","100","debit","Utility","Checking Account","",""\n' +

@@ -1,14 +1,12 @@
-import 'babel-polyfill';
-import {readFileSync} from 'fs';
-import {parseTransactions, removeHeaders, byRemovingCategories,
-  monthlySummary, totalDebit, fiTimes, totalCredit, fiRelativeTimes, possibleSavings} from './utils';
+const readFileSync = require('fs').readFileSync;
+const { parseTransactions, removeHeaders, byRemovingCategories,
+  monthlySummary, totalDebit, fiTimes, totalCredit, fiRelativeTimes, possibleSavings } = require('./utils');
 
 if (process.argv.length < 3) {
   console.log('Please include your mint transactions csv file as an argument');
   process.exit();
 }
 
-console.log(process.argv);
 console.log(`Reading data from ${process.argv[2]}`);
 const csvData = readFileSync(process.argv[2], 'utf8');
 

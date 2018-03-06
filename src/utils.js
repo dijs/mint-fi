@@ -1,6 +1,7 @@
-import groupBy from 'lodash/groupBy';
-import identity from 'lodash/identity';
-import sortBy from 'lodash/sortBy';
+const groupBy = require('lodash/groupBy');
+const identity = require('lodash/identity');
+const sortBy = require('lodash/sortBy');
+const get = require('lodash/get');
 
 function parseTransaction([date,,,amount, type, category]) {
   if (!date) {
@@ -22,7 +23,8 @@ function parseCsv(text) {
 function byType(transactions) {
   return transactions.reduce((types, transaction) => {
     const {type, category, amount} = transaction;
-    const sum = types[type][category] || 0;
+    const sum = get(types, ['type', category], 0);
+    if (!types[type]) return types;
     types[type][category] = sum + amount;
     return types;
   }, {
@@ -37,24 +39,24 @@ function sumByKey(obj, key) {
   }, 0);
 }
 
-export function byRemovingCategories(...categories) {
+module.exports.byRemovingCategories = (...categories) => {
   return transaction => {
     return !categories.includes(transaction.category);
   };
 }
 
-export function removeHeaders(text) {
+module.exports.removeHeaders = (text) => {
   return text.substring(text.indexOf('\n') + 1);
 }
 
-export function parseTransactions(text) {
+module.exports.parseTransactions = (text) => {
   return text.split('\n')
     .map(parseCsv)
     .map(parseTransaction)
     .filter(identity);
 }
 
-export function monthlySummary(transactions) {
+module.exports.monthlySummary = (transactions) => {
   const months = groupBy(transactions, 'date');
   return Object.keys(months).reduce((summary, key) => {
     const monthlyTransactions = months[key];
@@ -63,31 +65,40 @@ export function monthlySummary(transactions) {
   }, {});
 }
 
-export function totalDebit(summary) {
+function totalDebit(summary) {
   return sumByKey(summary, 'debit');
 }
 
-export function totalCredit(summary) {
+module.exports.totalDebit = totalDebit;
+
+const totalCredit = (summary) => {
   return sumByKey(summary, 'credit');
 }
 
-export function emergencyFund(n, months = 6) {
+module.exports.totalCredit = totalCredit;
+
+module.exports.emergencyFund = (n, months = 6) => {
   return n * months;
 }
 
-export function requiredSavings(n, interest = 0.04) {
+const requiredSavings = (n, interest = 0.04) => {
   return n / (interest / 12);
 }
 
-export function possibleSavings(summary) {
+module.exports.requiredSavings = requiredSavings;
+
+const possibleSavings = (summary) => {
   return totalCredit(summary) - totalDebit(summary);
 }
 
-export function monthsTillFI(expenses, savings, interest) {
+module.exports.possibleSavings = possibleSavings;
+
+const monthsTillFI = (expenses, savings, interest) => {
   return requiredSavings(expenses, interest) / savings;
 }
+module.exports.monthsTillFI = monthsTillFI
 
-export function fiTimes(summary, interest) {
+module.exports.fiTimes = (summary, interest) => {
   const savings = possibleSavings(summary);
   const times = Object.keys(summary.debit).map(category => {
     return {
@@ -98,7 +109,7 @@ export function fiTimes(summary, interest) {
   return sortBy(times, ({time}) => -time);
 }
 
-export function fiRelativeTimes(times) {
+module.exports.fiRelativeTimes = (times) => {
   const total = times.reduce((sum, category) => sum + category.time, 0);
   return times.map(({time, name}) => {
     return {
